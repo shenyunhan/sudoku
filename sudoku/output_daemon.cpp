@@ -25,14 +25,7 @@ inline void decode(int x, int& r, int& c, int& v)
 
 char board[10][10];
 
-void init_output_daemon(HANDLE hEvent)
-{
-	semaphore = hEvent;
-	InitializeCriticalSection(&lock);
-	join = CreateMutexEx(NULL, NULL, 0, MUTEX_ALL_ACCESS);
-}
-
-void get_board(const std::vector<int>& pos)
+inline void get_board(const std::vector<int>& pos)
 {
 	for (auto i : pos)
 	{
@@ -40,6 +33,13 @@ void get_board(const std::vector<int>& pos)
 		decode(i, r, c, v);
 		board[r][c] = '1' + v;
 	}
+}
+
+void init_output_daemon(HANDLE hEvent)
+{
+	semaphore = hEvent;
+	InitializeCriticalSection(&lock);
+	join = CreateMutexEx(NULL, NULL, 0, MUTEX_ALL_ACCESS);
 }
 
 void mark_output_kill()
@@ -85,6 +85,7 @@ void WINAPI output_main(void* args)
 			}
 			fputc('\n', output_index);
 		}
+		fflush(output_index);
 	}
 	ReleaseMutex(join);
 }

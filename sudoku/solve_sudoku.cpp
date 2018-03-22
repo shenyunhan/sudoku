@@ -34,14 +34,29 @@ inline int encode(int r, int c, int v)
 }
 
 DLX<325, 730> solver;
+int code[9][9][9];
+int row[730][4];
 int solve_sudoku(FILE* input_index)
 {
 	HANDLE hSemaphore = CreateSemaphore(NULL, 0, LONG_MAX, NULL);
-
 	// Start output daemon thread.
 	init_output_daemon(hSemaphore);
 	_beginthread(output_main, 0, NULL);
 
+	for (int i = 0; i < 9; i++)
+		for (int j = 0; j < 9; j++)
+			for (int k = 0; k < 9; k++)
+				code[i][j][k] = encode(i, j, k);
+	for (int i = 0; i < 9; i++)
+		for (int j = 0; j < 9; j++)
+			for (int k = 0; k < 9; k++)
+			{
+				int r = code[i][j][k];
+				row[r][0] = code[0][i][j];
+				row[r][1] = code[1][i][k];
+				row[r][2] = code[2][j][k];
+				row[r][3] = code[3][i / 3 * 3 + j / 3][k];
+			}
 	int n, puzzle[9][9];
 	for (n = 0; ~fgetint(puzzle[0][0], input_index); n++)
 	{
@@ -55,16 +70,11 @@ int solve_sudoku(FILE* input_index)
 				{
 					if (puzzle[i][j] != 0 && puzzle[i][j] != k + 1)
 						continue;
-					std::vector<int> c;
-					c.push_back(encode(0, i, j));
-					c.push_back(encode(1, i, k));
-					c.push_back(encode(2, j, k));
-					c.push_back(encode(3, i / 3 * 3 + j / 3, k));
-					solver.add_row(encode(i, j, k), c.begin(), c.end());
+					int r = code[i][j][k];
+					solver.link(r, row[r], row[r] + 4);
 				}
 		std::vector<int> pos;
 		solver.get_pos(pos);
-		assert(pos.size() == 81);
 
 		pass_board(n, std::move(pos));
 		ReleaseSemaphore(hSemaphore, 1, NULL);

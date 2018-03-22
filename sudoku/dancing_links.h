@@ -11,15 +11,14 @@ private:
 		Node *left, *right, *up, *down;
 	} *col[C], pool[C * R], *alloc;
 
-	Node* new_Node(int r, int c)
+	inline Node* new_Node(int r, int c)
 	{
 		Node* ret = alloc++;
 		ret->r = r, ret->c = c;
-		ret->left = ret->right = ret->down = ret->up = nullptr;
 		return ret;
 	}
 
-	void cover(int c)
+	inline void cover(int c)
 	{//覆盖
 		col[c]->left->right = col[c]->right;
 		col[c]->right->left = col[c]->left;
@@ -32,7 +31,7 @@ private:
 			}
 	}
 
-	void recover(int c)
+	inline void recover(int c)
 	{//恢复
 		for (auto i = col[c]->up; i != col[c]; i = i->up)
 			for (auto j = i->left; j != i; j = j->left)
@@ -43,7 +42,7 @@ private:
 		col[c]->left->right = col[c]->right->left = col[c];
 	}
 
-	bool dfs(int d)
+	bool dance(int d)
 	{//递归回溯
 		if (col[0]->right == col[0])
 		{
@@ -59,7 +58,7 @@ private:
 			ans[d] = i->r;
 			for (auto j = i->right; j != i; j = j->right)
 				cover(j->c);
-			if (dfs(d + 1)) return true;
+			if (dance(d + 1)) return true;
 			for (auto j = i->left; j != i; j = j->left)
 				recover(j->c);
 		}
@@ -83,7 +82,7 @@ public:
 	}
 
 	template<typename IteratorT>
-	void add_row(int r, IteratorT first, IteratorT last)
+	void link(int r, IteratorT first, IteratorT last)
 	{//在十字链表中添加整行
 		if (std::distance(first, last) == 0) return;
 		Node *head = new_Node(r, *first), *prev = head;
@@ -108,7 +107,7 @@ public:
 
 	bool get_pos(std::vector<int>& res)
 	{
-		if (!dfs(1)) return false;
+		if (!dance(1)) return false;
 		for (int i = 1; i < ans[0]; i++)
 			res.push_back(ans[i]);
 		return true;
