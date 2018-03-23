@@ -1,5 +1,5 @@
 # sudoku
-Software Engineering Personal Proposal
+Software Engineering Personal Project
 # For test
 The latest release version is in directory "BIN".
 Enter "sudoku.exe -c N" in cmd 
