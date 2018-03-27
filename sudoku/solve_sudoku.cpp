@@ -76,7 +76,7 @@ int solve_sudoku(FILE* input_index)
 		std::vector<int> pos;
 		solver.get_pos(pos);
 
-		pass_board(n, std::move(pos));
+		pass_board(n, pos);
 		ReleaseSemaphore(hSemaphore, 1, NULL);
 	}
 
