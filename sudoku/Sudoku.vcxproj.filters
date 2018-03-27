@@ -33,7 +33,10 @@
     <ClInclude Include="getopt.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="output_daemon.h">
+    <ClInclude Include="writer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="reader.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,7 +53,10 @@
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="output_daemon.cpp">
+    <ClCompile Include="writer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="reader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

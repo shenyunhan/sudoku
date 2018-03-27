@@ -34,6 +34,7 @@ void create_sudoku(int n)
 					fputc('\n', output_index);
 				}
 				if (--n) fputc('\n', output_index);
+				fflush(output_index);
 			}
 		}
 	}

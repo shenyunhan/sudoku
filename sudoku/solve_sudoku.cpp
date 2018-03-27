@@ -1,32 +1,8 @@
 #include "stdafx.h"
 #include "dancing_links.h"
 #include "solve_sudoku.h"
-#include "output_daemon.h"
-
-inline char fgetch(FILE* index)
-{
-	static const int siz = 1 << 15;
-	static char buffer[siz], *s = buffer, *t = buffer;
-	if (s == t) s = buffer, t = s + fread(buffer, 1, siz, index);
-	return s == t ? 0 : *(s++);
-}
-
-inline int fgetint(int& res, FILE* index)
-{
-	res = 0;
-	char ch;
-	do
-	{
-		ch = fgetch(index);
-		if (ch == 0) return -1;
-	} while (!isdigit(ch) && ch != '-');
-	do
-	{
-		res = res * 10 + ch - '0';
-		ch = fgetch(index);
-	} while (isdigit(ch));
-	return 1;
-}
+#include "reader.h"
+#include "writer.h"
 
 inline int encode(int r, int c, int v)
 {
@@ -36,12 +12,23 @@ inline int encode(int r, int c, int v)
 DLX<325, 730> solver;
 int code[9][9][9];
 int row[730][4];
+
 int solve_sudoku(FILE* input_index)
 {
-	HANDLE hSemaphore = CreateSemaphore(NULL, 0, LONG_MAX, NULL);
-	// Start output daemon thread.
-	init_output_daemon(hSemaphore);
-	_beginthread(output_main, 0, NULL);
+	if (!input_index)
+	{
+		printf("ERROR: unable to open input file!\n");
+		exit(1);
+	}
+	FILE* output_index = fopen("sudoku.txt", "w");
+	if (!output_index)
+	{
+		fprintf(stderr, "ERROR: unable to open output file!\n");
+		exit(1);
+	}
+
+	Reader reader(input_index);
+	Writer writer(output_index);
 
 	for (int i = 0; i < 9; i++)
 		for (int j = 0; j < 9; j++)
@@ -58,11 +45,8 @@ int solve_sudoku(FILE* input_index)
 				row[r][3] = code[3][i / 3 * 3 + j / 3][k];
 			}
 	int n, puzzle[9][9];
-	for (n = 0; ~fgetint(puzzle[0][0], input_index); n++)
+	for (n = 0; reader.fetch(puzzle); n++)
 	{
-		for (int i = 0; i < 9; i++)
-			for (int j = 0; j < 9; j++)
-				if (i || j) fgetint(puzzle[i][j], input_index);
 		solver.clear();
 		for (int i = 0; i < 9; i++)
 			for (int j = 0; j < 9; j++)
@@ -76,13 +60,11 @@ int solve_sudoku(FILE* input_index)
 		std::vector<int> pos;
 		solver.get_pos(pos);
 
-		pass_board(n, pos);
-		ReleaseSemaphore(hSemaphore, 1, NULL);
+		writer.pass_board(n, pos);
 	}
 
-	mark_output_kill();
-	join_output_daemon();
-	CloseHandle(hSemaphore);
+	writer.set_kill();
+	writer.join();
 
 	return n;
 }
