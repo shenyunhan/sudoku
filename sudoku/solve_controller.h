@@ -5,16 +5,20 @@
 
 class SolveController
 {
-	Solver solver1, solver2;
+	int thread_cnt;
+	Solver** solver;
 
 public:
-	SolveController(Reader*, Writer*);
+	SolveController(int, Reader*, Writer*);
 	~SolveController();
+
+	SolveController(const SolveController&) = delete;
+	SolveController(SolveController&&) = delete;
 
 	void start();
 	int get_solved_cnt();
 
-	void get_synchronize_objects(HANDLE&, HANDLE&);
+	void get_synchronize_objects(HANDLE*);
 
 	static void initialize();
 };

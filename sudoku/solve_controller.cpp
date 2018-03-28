@@ -2,14 +2,20 @@
 #include "solve_controller.h"
 
 
-SolveController::SolveController(Reader* reader, Writer* writer)
-	: solver1(reader, writer), solver2(reader, writer)
+SolveController::SolveController(int thread_cnt, Reader* reader, Writer* writer) :
+	thread_cnt(thread_cnt)
 {
+	solver = new Solver*[thread_cnt];
+	for (int i = 0; i < thread_cnt; i++)
+		solver[i] = new Solver(reader, writer);
 }
 
 
 SolveController::~SolveController()
 {
+	for (int i = 0; i < thread_cnt; i++)
+		delete solver[i];
+	delete[] solver;
 }
 
 
@@ -21,17 +27,20 @@ void SolveController::initialize()
 
 void SolveController::start()
 {
-	solver1.start();
-	solver2.start();
+	for (int i = 0; i < thread_cnt; i++)
+		solver[i]->start();
 }
 
 int SolveController::get_solved_cnt()
 {
-	return solver1.get_solved_cnt() + solver2.get_solved_cnt();
+	int ret = 0;
+	for (int i = 0; i < thread_cnt; i++)
+		ret += solver[i]->get_solved_cnt();
+	return ret;
 }
 
-void SolveController::get_synchronize_objects(HANDLE& hObj1, HANDLE& hObj2)
+void SolveController::get_synchronize_objects(HANDLE* hObj)
 {
-	hObj1 = solver1.get_synchronize_object();
-	hObj2 = solver2.get_synchronize_object();
+	for (int i = 0; i < thread_cnt; i++)
+		hObj[i] = solver[i]->get_synchronize_object();
 }

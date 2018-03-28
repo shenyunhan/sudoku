@@ -23,6 +23,9 @@ public:
 	static void init();
 	void start();
 
+	Solver(const Solver&) = delete;
+	Solver(Solver&&) = delete;
+
 	int get_solved_cnt() const
 	{
 		return solved_cnt;

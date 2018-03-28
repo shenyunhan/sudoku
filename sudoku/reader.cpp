@@ -34,9 +34,7 @@ void WINAPI input_main(void* args)
 	{
 		if (fgetint(pReader->puzzle[0][0], pReader->index) == -1)
 		{
-			pReader->eof = true;
-			SetEvent(pReader->hFetchEvent);
-			CloseHandle(pReader->hFetchEvent);
+			SetEvent(pReader->hEofEvent);
 			break;
 		}
 
@@ -49,16 +47,21 @@ void WINAPI input_main(void* args)
 	}
 }
 
-Reader::Reader(FILE* index) : index(index), eof(false), id(0)
+Reader::Reader(FILE* index) : index(index), id(0)
 {
+	hEofEvent = CreateEventW(NULL, TRUE, FALSE, NULL);
 	hFetchEvent = CreateEventW(NULL, FALSE, FALSE, NULL);
 	hReadEvent = CreateEventW(NULL, FALSE, FALSE, NULL);
 	hThread = (HANDLE)_beginthread(input_main, 0, this);
+
+	hFetchWaitChain[0] = hFetchEvent;
+	hFetchWaitChain[1] = hEofEvent;
 }
 
 Reader::~Reader()
 {
 	fclose(index);
+	CloseHandle(hEofEvent);
 	CloseHandle(hFetchEvent);
 	CloseHandle(hReadEvent);
 	CloseHandle(hThread);
@@ -66,10 +69,8 @@ Reader::~Reader()
 
 bool Reader::fetch(int& id, board_t& res)
 {
-	int ret = WaitForSingleObject(hFetchEvent, INFINITE);
+	int ret = WaitForMultipleObjects(2, hFetchWaitChain, FALSE, INFINITE);
 	if (ret != WAIT_OBJECT_0) return false;
-
-	if (eof) return false;
 
 	for (int i = 0; i < 9; i++)
 		for (int j = 0; j < 9; j++)
