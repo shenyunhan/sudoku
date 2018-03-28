@@ -1,17 +1,8 @@
 #include "stdafx.h"
-#include "dancing_links.h"
 #include "solve_sudoku.h"
 #include "reader.h"
 #include "writer.h"
-
-inline int encode(int r, int c, int v)
-{
-	return r * 81 + c * 9 + v + 1;
-}
-
-DLX<325, 730> solver;
-int code[9][9][9];
-int row[730][4];
+#include "solver.h"
 
 int solve_sudoku(FILE* input_index)
 {
@@ -30,41 +21,26 @@ int solve_sudoku(FILE* input_index)
 	Reader reader(input_index);
 	Writer writer(output_index);
 
-	for (int i = 0; i < 9; i++)
-		for (int j = 0; j < 9; j++)
-			for (int k = 0; k < 9; k++)
-				code[i][j][k] = encode(i, j, k);
-	for (int i = 0; i < 9; i++)
-		for (int j = 0; j < 9; j++)
-			for (int k = 0; k < 9; k++)
-			{
-				int r = code[i][j][k];
-				row[r][0] = code[0][i][j];
-				row[r][1] = code[1][i][k];
-				row[r][2] = code[2][j][k];
-				row[r][3] = code[3][i / 3 * 3 + j / 3][k];
-			}
-	int n, puzzle[9][9];
-	for (n = 0; reader.fetch(puzzle); n++)
-	{
-		solver.clear();
-		for (int i = 0; i < 9; i++)
-			for (int j = 0; j < 9; j++)
-				for (int k = 0; k < 9; k++)
-				{
-					if (puzzle[i][j] != 0 && puzzle[i][j] != k + 1)
-						continue;
-					int r = code[i][j][k];
-					solver.link(r, row[r], row[r] + 4);
-				}
-		std::vector<int> pos;
-		solver.get_pos(pos);
+	Solver::init();
+	Solver solver(&reader, &writer);
+	solver.start();
 
-		writer.pass_board(n, pos);
+	HANDLE hTimer = CreateWaitableTimerW(NULL, FALSE, NULL);
+	LARGE_INTEGER due;
+	due.QuadPart = 0LL;
+	SetWaitableTimer(hTimer, &due, 1000, NULL, NULL, FALSE);
+
+	HANDLE waitVector[2] = { hTimer, solver.get_synchronize_object() };
+	for (;;)
+	{
+		int id = WaitForMultipleObjects(2, waitVector, FALSE, INFINITE);
+		if (id == 0)
+		{
+			printf("%d sudoku puzzles solved.\r", solver.get_solved_cnt());
+		}
+		else break;
 	}
 
-	writer.set_kill();
-	writer.join();
-
-	return n;
+	CloseHandle(hTimer);
+	return solver.get_solved_cnt();
 }

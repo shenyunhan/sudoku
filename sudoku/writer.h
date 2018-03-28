@@ -14,7 +14,7 @@ private:
 public:
 	Writer(FILE*);
 	~Writer();
-	void pass_board(int n, std::vector<int>&);
+	void pass(int n, std::vector<int>&);
 	void join();
 	void set_kill();
 	friend void WINAPI output_main(void*);

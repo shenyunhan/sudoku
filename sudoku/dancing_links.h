@@ -4,12 +4,12 @@ template<size_t C, size_t R>
 class DLX
 {
 private:
-	int sum[C], ans[R];
+	int *sum, *ans;
 	struct Node
 	{
 		int r, c;
 		Node *left, *right, *up, *down;
-	} *col[C], pool[C * R], *alloc;
+	} **col, *pool, *alloc;
 
 	inline Node* new_Node(int r, int c)
 	{
@@ -67,10 +67,26 @@ private:
 	}
 
 public:
+	DLX()
+	{
+		sum = new int[C];
+		ans = new int[R];
+		col = new Node*[C];
+		pool = new Node[R * C];
+	}
+
+	~DLX()
+	{
+		delete[] sum;
+		delete[] ans;
+		delete[] col;
+		delete[] pool;
+	}
+
 	void clear()
 	{
 		alloc = pool;
-		memset(sum, 0, sizeof sum);
+		memset(sum, 0, sizeof(int) * C);
 		for (int i = 0; i < C; i++)
 			col[i] = new_Node(0, i);
 		for (int i = 0; i < C; i++)

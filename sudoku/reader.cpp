@@ -55,7 +55,6 @@ Reader::Reader(FILE* index) : index(index), eof(false)
 	hThread = (HANDLE)_beginthread(input_main, 0, this);
 }
 
-
 Reader::~Reader()
 {
 	fclose(index);
@@ -64,7 +63,7 @@ Reader::~Reader()
 	CloseHandle(hThread);
 }
 
-bool Reader::fetch(int (&res)[9][9])
+bool Reader::fetch(board_t& res)
 {
 	int ret = WaitForSingleObject(hFetchEvent, INFINITE);
 	if (ret != WAIT_OBJECT_0) return false;

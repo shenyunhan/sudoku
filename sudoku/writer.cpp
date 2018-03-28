@@ -9,7 +9,7 @@ inline void decode(int x, int& r, int& c, int& v)
 	r = x;
 }
 
-inline void get_board(const std::vector<int>& pos, char (&board)[10][10])
+inline void transform(const std::vector<int>& pos, char (&board)[10][10])
 {
 	for (auto i : pos)
 	{
@@ -36,7 +36,7 @@ void WINAPI output_main(void* args)
 		int n = pWriter->idx.front();
 		pWriter->idx.pop();
 		char board[10][10];
-		get_board(pWriter->boards.front(), board);
+		transform(pWriter->boards.front(), board);
 		pWriter->boards.pop();
 
 		LeaveCriticalSection(&pWriter->lock);
@@ -63,7 +63,6 @@ Writer::Writer(FILE* index) :
 	hThread = (HANDLE)_beginthread(output_main, 0, this);
 }
 
-
 Writer::~Writer()
 {
 	fclose(index);
@@ -71,7 +70,7 @@ Writer::~Writer()
 	CloseHandle(semaphore);
 }
 
-void Writer::pass_board(int n, std::vector<int>& pos)
+void Writer::pass(int n, std::vector<int>& pos)
 {
 	EnterCriticalSection(&lock);
 
