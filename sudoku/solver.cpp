@@ -13,14 +13,14 @@ unsigned WINAPI work_main(void* args)
 {
 	Solver* pSolver = reinterpret_cast<Solver*>(args);
 	board_t puzzle;
-	int id;
-	while (pSolver->pReader->fetch(id, puzzle))
+	int idx;
+	while (pSolver->pReader->fetch(idx, puzzle))
 	{
 		pSolver->build(puzzle);
 		std::vector<int> pos;
 		pSolver->dlx.get_pos(pos);
 
-		pSolver->pWriter->pass(id, std::move(pos));
+		pSolver->pWriter->pass(idx, std::move(pos));
 		++pSolver->solved_cnt;
 	}
 
@@ -62,8 +62,6 @@ void Solver::init()
 				row[r][2] = code[2][j][k];
 				row[r][3] = code[3][i / 3 * 3 + j / 3][k];
 			}
-
-	initialized = true;
 }
 
 void Solver::build(const_board_t& puzzle)

@@ -4,7 +4,7 @@ class Reader
 private:
 	FILE* index;
 	bool eof;
-	int id;
+	int idx;
 	board_t puzzle;
 	HANDLE hThread, hFetchEvent, hReadEvent;
 

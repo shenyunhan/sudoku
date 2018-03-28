@@ -5,16 +5,16 @@
 
 class SolveController
 {
-	Solver solver1, solver2;
+	std::vector<Solver> solver;
 
 public:
-	SolveController(Reader*, Writer*);
-	~SolveController();
+	SolveController(int, Reader*, Writer*);
+	~SolveController() = default;
 
 	void start();
 	int get_solved_cnt();
 
-	void get_synchronize_objects(HANDLE&, HANDLE&);
+	void get_synchronize_objects(HANDLE*) const;
 
 	static void initialize();
 };

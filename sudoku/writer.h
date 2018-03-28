@@ -6,7 +6,7 @@ class Writer
 private:
 	FILE* index;
 	bool kill;
-	volatile unsigned int nxt;
+	volatile unsigned int next_idx;
 	std::queue<int> idx;
 	std::queue<std::vector<int>> boards;
 	HANDLE hThread, semaphore;

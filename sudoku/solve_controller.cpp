@@ -1,17 +1,11 @@
 #include "stdafx.h"
 #include "solve_controller.h"
 
-
-SolveController::SolveController(Reader* reader, Writer* writer)
-	: solver1(reader, writer), solver2(reader, writer)
+SolveController::SolveController(int n, Reader* reader, Writer* writer)
 {
+	for (int i = 0; i < n; i++)
+		solver.emplace_back(reader, writer);
 }
-
-
-SolveController::~SolveController()
-{
-}
-
 
 void SolveController::initialize()
 {
@@ -21,17 +15,20 @@ void SolveController::initialize()
 
 void SolveController::start()
 {
-	solver1.start();
-	solver2.start();
+	for (auto& i : solver)
+		i.start();
 }
 
 int SolveController::get_solved_cnt()
 {
-	return solver1.get_solved_cnt() + solver2.get_solved_cnt();
+	int ret = 0;
+	for (const auto& i : solver)
+		ret += i.get_solved_cnt();
+	return ret;
 }
 
-void SolveController::get_synchronize_objects(HANDLE& hObj1, HANDLE& hObj2)
+void SolveController::get_synchronize_objects(HANDLE* hObj) const
 {
-	hObj1 = solver1.get_synchronize_object();
-	hObj2 = solver2.get_synchronize_object();
+	for (int i = 0; i < (int)solver.size(); i++)
+		hObj[i] = solver[i].get_synchronize_object();
 }

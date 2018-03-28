@@ -5,19 +5,15 @@
 #include "solver.h"
 #include "solve_controller.h"
 
-void alert_thread_main(void* args)
+unsigned alert_thread_main(void* args)
 {
 	HANDLE* hWaitHandles = (HANDLE*)args;
-	WaitForMultipleObjects(2, hWaitHandles, TRUE, INFINITE);
+	WaitForMultipleObjects(SOLVER_THREAD_CNT, hWaitHandles, TRUE, INFINITE);
+	return 0;
 }
 
 int solve_sudoku(FILE* input_index)
 {
-	if (!input_index)
-	{
-		printf("ERROR: unable to open input file!\n");
-		exit(1);
-	}
 	FILE* output_index = fopen("sudoku.txt", "w");
 	if (!output_index)
 	{
@@ -29,21 +25,17 @@ int solve_sudoku(FILE* input_index)
 	Writer writer(output_index);
 
 	SolveController::initialize();
-	SolveController controller = SolveController(&reader, &writer);
+	SolveController controller = SolveController(SOLVER_THREAD_CNT, &reader, &writer);
 	controller.start();
-
-	// Solver::init();
-	// Solver solver(&reader, &writer);
-	// solver.start();
 
 	HANDLE hTimer = CreateWaitableTimerW(NULL, FALSE, NULL);
 	LARGE_INTEGER due;
 	due.QuadPart = 0LL;
 	SetWaitableTimer(hTimer, &due, 1000, NULL, NULL, FALSE);
 
-	HANDLE* hControllerWaitHandles = new HANDLE[2];
-	controller.get_synchronize_objects(hControllerWaitHandles[0], hControllerWaitHandles[1]);
-	HANDLE hAlert = (HANDLE)_beginthread(alert_thread_main, 0, hControllerWaitHandles);
+	HANDLE* hControllerWaitHandles = new HANDLE[SOLVER_THREAD_CNT];
+	controller.get_synchronize_objects(hControllerWaitHandles);
+	HANDLE hAlert = (HANDLE)_beginthreadex(NULL, 0, alert_thread_main, hControllerWaitHandles, 0, NULL);
 
 	HANDLE waitVector[2] = { hTimer, hAlert };
 	for (;;)
@@ -51,11 +43,12 @@ int solve_sudoku(FILE* input_index)
 		int id = WaitForMultipleObjects(2, waitVector, FALSE, INFINITE);
 		if (id == 0)
 		{
-			printf("%d sudoku puzzles solved.\r", controller.get_solved_cnt());
+			printf("%d sudoku puzzles solved.\n", controller.get_solved_cnt());
 		}
 		else break;
 	}
 
+	delete[] hControllerWaitHandles;
 	CloseHandle(hTimer);
 	CloseHandle(hAlert);
 	return controller.get_solved_cnt();
