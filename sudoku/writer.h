@@ -22,5 +22,5 @@ public:
 	void pass(uint32_t, std::vector<int>&);
 	void join();
 	void set_kill();
-	friend void WINAPI output_main(void*);
+	friend unsigned WINAPI output_main(void*);
 };

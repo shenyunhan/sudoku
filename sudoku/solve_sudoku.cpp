@@ -7,10 +7,11 @@
 
 #define SOLVER_THREAD_CNT (logical_processor_count / 2 + 1)
 
-void alert_thread_main(void* args)
+unsigned alert_thread_main(void* args)
 {
 	HANDLE* hWaitHandles = (HANDLE*)args;
 	WaitForMultipleObjects(SOLVER_THREAD_CNT, hWaitHandles, TRUE, INFINITE);
+	return 0;
 }
 
 int solve_sudoku(FILE* input_index)
@@ -41,7 +42,7 @@ int solve_sudoku(FILE* input_index)
 
 	HANDLE* hControllerWaitHandles = new HANDLE[SOLVER_THREAD_CNT];
 	controller.get_synchronize_objects(hControllerWaitHandles);
-	HANDLE hAlert = (HANDLE)_beginthread(alert_thread_main, 0, hControllerWaitHandles);
+	HANDLE hAlert = (HANDLE)_beginthreadex(NULL, 0, alert_thread_main, hControllerWaitHandles, 0, NULL);
 
 	HANDLE waitVector[2] = { hTimer, hAlert };
 	for (;;)

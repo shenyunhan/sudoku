@@ -19,7 +19,7 @@ inline void transform(const std::vector<int>& pos, char (&board)[10][10])
 	}
 }
 
-void WINAPI output_main(void* args)
+unsigned WINAPI output_main(void* args)
 {
 	Writer* pWriter = (Writer*)args;
 	for (;;)
@@ -53,6 +53,8 @@ void WINAPI output_main(void* args)
 		}
 		fflush(pWriter->index);
 	}
+
+	return 0;
 }
 
 Writer::Writer(FILE* index) :
@@ -60,7 +62,7 @@ Writer::Writer(FILE* index) :
 {
 	InitializeCriticalSection(&lock);
 	semaphore = CreateSemaphoreW(NULL, 0, LONG_MAX, NULL);
-	hThread = (HANDLE)_beginthread(output_main, 0, this);
+	hThread = (HANDLE)_beginthreadex(NULL, 0, output_main, this, 0, NULL);
 }
 
 Writer::~Writer()

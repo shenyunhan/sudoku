@@ -26,7 +26,7 @@ inline int fgetint(int& res, FILE* index)
 	return 1;
 }
 
-void WINAPI input_main(void* args) 
+unsigned WINAPI input_main(void* args) 
 {
 	Reader* pReader = (Reader*)args;
 
@@ -45,6 +45,8 @@ void WINAPI input_main(void* args)
 		++pReader->id;
 		SignalObjectAndWait(pReader->hFetchEvent, pReader->hReadEvent, INFINITE, FALSE);
 	}
+
+	return 0;
 }
 
 Reader::Reader(FILE* index) : index(index), id(0)
@@ -52,7 +54,7 @@ Reader::Reader(FILE* index) : index(index), id(0)
 	hEofEvent = CreateEventW(NULL, TRUE, FALSE, NULL);
 	hFetchEvent = CreateEventW(NULL, FALSE, FALSE, NULL);
 	hReadEvent = CreateEventW(NULL, FALSE, FALSE, NULL);
-	hThread = (HANDLE)_beginthread(input_main, 0, this);
+	hThread = (HANDLE)_beginthreadex(NULL, 0, input_main, this, 0, NULL);
 
 	hFetchWaitChain[0] = hFetchEvent;
 	hFetchWaitChain[1] = hEofEvent;

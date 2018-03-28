@@ -16,6 +16,6 @@ public:
 	Reader(Reader&&) = delete;
 
 	bool fetch(int&, board_t&);
-	friend void WINAPI input_main(void*);
+	friend unsigned WINAPI input_main(void*);
 };
 
