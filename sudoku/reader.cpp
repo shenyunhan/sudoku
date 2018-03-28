@@ -44,11 +44,12 @@ void WINAPI input_main(void* args)
 			for (int j = 0; j < 9; j++)
 				if (i || j) fgetint(pReader->puzzle[i][j], pReader->index);
 
+		++pReader->id;
 		SignalObjectAndWait(pReader->hFetchEvent, pReader->hReadEvent, INFINITE, FALSE);
 	}
 }
 
-Reader::Reader(FILE* index) : index(index), eof(false)
+Reader::Reader(FILE* index) : index(index), eof(false), id(0)
 {
 	hFetchEvent = CreateEventW(NULL, FALSE, FALSE, NULL);
 	hReadEvent = CreateEventW(NULL, FALSE, FALSE, NULL);
@@ -63,7 +64,7 @@ Reader::~Reader()
 	CloseHandle(hThread);
 }
 
-bool Reader::fetch(board_t& res)
+bool Reader::fetch(int& id, board_t& res)
 {
 	int ret = WaitForSingleObject(hFetchEvent, INFINITE);
 	if (ret != WAIT_OBJECT_0) return false;
@@ -73,6 +74,7 @@ bool Reader::fetch(board_t& res)
 	for (int i = 0; i < 9; i++)
 		for (int j = 0; j < 9; j++)
 			res[i][j] = puzzle[i][j];
+	id = this->id;
 
 	SetEvent(hReadEvent);
 	return true;

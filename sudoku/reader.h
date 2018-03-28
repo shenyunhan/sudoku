@@ -4,13 +4,14 @@ class Reader
 private:
 	FILE* index;
 	bool eof;
+	int id;
 	board_t puzzle;
 	HANDLE hThread, hFetchEvent, hReadEvent;
 
 public:
 	Reader(FILE*);
 	~Reader();
-	bool fetch(board_t&);
+	bool fetch(int&, board_t&);
 	friend void WINAPI input_main(void*);
 };
 

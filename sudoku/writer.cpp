@@ -41,7 +41,7 @@ void WINAPI output_main(void* args)
 
 		LeaveCriticalSection(&pWriter->lock);
 
-		if (n) fputc('\n', pWriter->index);
+		if (n != 1) fputc('\n', pWriter->index);
 		for (int i = 0; i < 9; i++)
 		{
 			for (int j = 0; j < 9; j++)
@@ -56,7 +56,7 @@ void WINAPI output_main(void* args)
 }
 
 Writer::Writer(FILE* index) :
-	index(index), kill(false), idx(), boards()
+	index(index), kill(false), nxt(1), idx(), boards()
 {
 	InitializeCriticalSection(&lock);
 	semaphore = CreateSemaphoreW(NULL, 0, LONG_MAX, NULL);
@@ -70,14 +70,19 @@ Writer::~Writer()
 	CloseHandle(semaphore);
 }
 
-void Writer::pass(int n, std::vector<int>& pos)
+void Writer::pass(uint32_t n, std::vector<int>&& pos)
 {
+	// Spin wait.
+	while (nxt != n)
+		NOP;
+
 	EnterCriticalSection(&lock);
 
 	idx.push(n);
-	boards.push(pos);
+	boards.push(std::move(pos));
 	ReleaseSemaphore(semaphore, 1, NULL);
 
+	++nxt;
 	LeaveCriticalSection(&lock);
 }
 

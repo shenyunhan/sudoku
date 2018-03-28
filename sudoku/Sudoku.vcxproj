@@ -153,6 +153,7 @@
     <ClInclude Include="getopt.h" />
     <ClInclude Include="reader.h" />
     <ClInclude Include="solver.h" />
+    <ClInclude Include="solve_controller.h" />
     <ClInclude Include="solve_sudoku.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -162,6 +163,7 @@
     <ClCompile Include="create_sudoku.cpp" />
     <ClCompile Include="reader.cpp" />
     <ClCompile Include="solver.cpp" />
+    <ClCompile Include="solve_controller.cpp" />
     <ClCompile Include="solve_sudoku.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

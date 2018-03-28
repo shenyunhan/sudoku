@@ -13,13 +13,15 @@ unsigned WINAPI work_main(void* args)
 {
 	Solver* pSolver = reinterpret_cast<Solver*>(args);
 	board_t puzzle;
-	while (pSolver->pReader->fetch(puzzle))
+	int id;
+	while (pSolver->pReader->fetch(id, puzzle))
 	{
 		pSolver->build(puzzle);
 		std::vector<int> pos;
 		pSolver->dlx.get_pos(pos);
 
-		pSolver->pWriter->pass(pSolver->solved_cnt++, pos);
+		pSolver->pWriter->pass(id, std::move(pos));
+		++pSolver->solved_cnt;
 	}
 
 	pSolver->pWriter->set_kill();
@@ -41,6 +43,10 @@ Solver::~Solver()
 
 void Solver::init()
 {
+	static volatile uint32_t initialized = FALSE;
+	if (InterlockedCompareExchange(&initialized, TRUE, FALSE) == TRUE)
+		return;
+
 	for (int i = 0; i < 9; i++)
 		for (int j = 0; j < 9; j++)
 			for (int k = 0; k < 9; k++)
@@ -56,6 +62,8 @@ void Solver::init()
 				row[r][2] = code[2][j][k];
 				row[r][3] = code[3][i / 3 * 3 + j / 3][k];
 			}
+
+	initialized = true;
 }
 
 void Solver::build(const_board_t& puzzle)

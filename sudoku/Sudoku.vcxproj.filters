@@ -42,6 +42,9 @@
     <ClInclude Include="solver.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="solve_controller.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -63,6 +66,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="solver.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="solve_controller.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

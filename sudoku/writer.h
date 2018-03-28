@@ -6,6 +6,7 @@ class Writer
 private:
 	FILE* index;
 	bool kill;
+	volatile unsigned int nxt;
 	std::queue<int> idx;
 	std::queue<std::vector<int>> boards;
 	HANDLE hThread, semaphore;
@@ -14,7 +15,7 @@ private:
 public:
 	Writer(FILE*);
 	~Writer();
-	void pass(int n, std::vector<int>&);
+	void pass(uint32_t n, std::vector<int>&&);
 	void join();
 	void set_kill();
 	friend void WINAPI output_main(void*);
